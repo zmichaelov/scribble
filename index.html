@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Scribble</title>
+    <meta charset=utf-8>
+    <script src="static/codemirror/lib/codemirror.js"></script>
+    <script src="static/codemirror/mode/markdown.js"></script>
+    <script src="static/codemirror/mode/xml.js"></script>
+    <script src="static/showdown.js"></script>
+    <script src="static/jquery-1.7.2.min.js"></script>
+    <script src="static/bootstrap/js/bootstrap.min.js"></script>
+    <link rel=stylesheet href="static/codemirror/lib/codemirror.css">
+    <link rel=stylesheet href="static/bootstrap/css/bootstrap.min.css">
+<!--     <link rel="stylesheet" href="codemirror/theme/elegant.css"> -->
+    <style type=text/css>
+      .CodeMirror {
+        width: 100%;
+        height: 620px;
+      }
+      .CodeMirror-scroll {
+        height: 100%;
+      }
+
+       #output {
+        height: 620px;
+        float: right;
+        /*overflow: auto;*/
+        margin-left: 0px;
+        background-color: #FFFFFF;
+       }
+       h3 {
+        color: #FEC34F;
+       }
+       .container-fluid {
+        height: 100%;
+        /*margin-left: 0px;*/
+       }
+       
+       .row {
+        /*margin-left: 0px;*/
+       }
+       iframe {
+        height: 100%;
+        width: 100%;
+       }
+       #header {
+        margin-left: 20px;
+       }
+    </style>
+  </head>
+  <body>
+        <div id=header>
+            <h3>Scribble <small>Simple. Live. Markdown.</small></h3>
+            <div id=navbar class="btn-group">             
+                <button class="btn btn-success btn-mini" onclick="">Save</button>
+                <button class="btn btn-success btn-mini dropdown-toggle" data-toggle="dropdown">
+                    <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li><a href="">As Markdown</a></li>
+                    <li><a href="">As HTML</a></li>    
+                </ul>
+                <button class="btn btn-info btn-mini" onclick="zPrint(preview);">Print</button>
+            </div>
+        </div>
+        <div class="container-fluid">
+
+             <div id="editor" class="row">
+                <div class="span7">
+               <!-- where the user will edit their code -->
+                
+                   <textarea id="code" name="code">
+               
+                   </textarea>                                    
+                </div>
+
+                <div id="output" class="span7">              
+                   <!-- where the preview will be rendered -->
+                   <iframe id=preview name=preview>
+
+                   
+                   </iframe>
+                </div>
+
+              </div><!--end editor -->
+              
+        </div>    
+
+    
+
+<!--     Additional Javascript -->
+         <script>
+           var converter = new Showdown.converter();
+           var delay;
+           // Initialize CodeMirror editor with a nice html5 canvas demo.
+           var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
+             mode: 'markdown',
+             tabMode: 'indent',
+//              theme: "elegant",
+             lineNumbers: true,
+             onChange: function() {
+               clearTimeout(delay);
+               delay = setTimeout(updatePreview, 300);
+             }
+           });
+            function zPrint(frame)
+            {
+                frame.focus();
+                frame.print();
+            }
+//            function updatePreview() {
+// 	         outputPane = document.getElementById("output");             
+//              var html = converter.makeHtml(editor.getValue());
+// //              editor2.setValue(html);
+//              outputPane.innerHTML = html;
+//            }
+//            setTimeout(updatePreview, 300);
+
+           var css = "<head><link href=\"static/styles/markdown.css\" rel=\"stylesheet\"/></head>";
+           function updatePreview() {
+             var previewFrame = document.getElementById('preview');
+             var preview =  previewFrame.contentDocument ||  previewFrame.contentWindow.document;
+             preview.open();
+             var html = converter.makeHtml(editor.getValue().trim());             
+             preview.write("<html>"+css+html+"</html>");
+//              preview.close();
+           }
+           setTimeout(updatePreview, 300);
+         </script>
+  </body>
+</html>
