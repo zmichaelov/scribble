@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html manifest="offline.manifest">
   <head>
     <title>Scribble</title>
     <meta charset=utf-8>
@@ -20,10 +20,18 @@
       .CodeMirror-scroll {
         height: 100%;
       }
-
+    .btn-group{
+        padding-left: 0px;
+        padding-right: 0px;
+    }
+    .btn-toolbar{
+        margin-top: 0px;
+        margin-bottom: 0px;
+    }
        #output {
         height: 620px;
         float: right;
+        
         /*overflow: auto;*/
         margin-left: 0px;
         background-color: #FFFFFF;
@@ -46,21 +54,44 @@
        #header {
         margin-left: 20px;
        }
+       .open {
+       
+       }
     </style>
   </head>
   <body>
         <div id=header>
             <h3>Scribble <small>Simple. Live. Markdown.</small></h3>
-            <div id=navbar class="btn-group">             
-                <button class="btn btn-success btn-mini" onclick="">Save</button>
-                <button class="btn btn-success btn-mini dropdown-toggle" data-toggle="dropdown">
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu">
-                    <li><a href="">As Markdown</a></li>
-                    <li><a href="">As HTML</a></li>    
-                </ul>
-                <button class="btn btn-info btn-mini" onclick="zPrint(preview);">Print</button>
+            <div id=navbar class="btn-toolbar">
+                <div class="btn-group">
+                    <button class="btn btn-warning btn-mini" onclick="newEditor();">New</button>
+                </div>
+                
+                <div class="btn-group">
+                    <a id=open class="btn dropdown-toggle btn-warning btn-mini" data-toggle="dropdown" href="#">
+                        Open<span class="caret"></span>
+                    </a>
+                    <ul id=filelist class="dropdown-menu">
+                        
+                    </ul>
+                </div>
+                
+                <div class="btn-group"><button class="btn btn-warning btn-mini" data-toggle="modal" data-target="#saveModal">Save</button></div>
+                    
+<!-- 
+                <div class="btn-group">
+                    <a id=export class="btn dropdown-toggle btn-warning btn-mini" data-toggle="dropdown" href="#">
+                        Export<class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href="#">As Markdown</a></li>
+                        <li><a href="#" target="_blank" onclick="export_html();">As HTML</a></li>
+                    </ul>
+                </div>
+ -->
+
+                <div class="btn-group"><button class="btn btn-warning btn-mini" onclick="zPrint(preview);">Print</button></div>
+                    
             </div>
         </div>
         <div class="container-fluid">
@@ -89,14 +120,63 @@
     
 
 <!--     Additional Javascript -->
-         <script>
+        <script>
+            // Initialize filesystem
+//             window.requestFileSystem  = window.requestFileSystem || window.webkitRequestFileSystem;
+//             
+//             window.requestFileSystem(window.TEMPORARY, 5*1024*1024, initFS, errorHandler);
+//             
+//             function initFS(fs){
+//                 alert("Welcome to Filesystem! It's showtime :)"); // Just to check if everything is OK :)
+//                 // place the functions you will learn bellow here
+//             }
+//             
+//             function errorHandler(){
+//                 console.log('An error occured');
+//             }       
+//             function errorHandler(err){
+//              var msg = 'An error occured: ';
+//              
+//               switch (err.code) { 
+//                 case FileError.NOT_FOUND_ERR: 
+//                   msg += 'File or directory not found'; 
+//                   break;
+//              
+//                 case FileError.NOT_READABLE_ERR: 
+//                   msg += 'File or directory not readable'; 
+//                   break;
+//              
+//                 case FileError.PATH_EXISTS_ERR: 
+//                   msg += 'File or directory already exists'; 
+//                   break;
+//              
+//                 case FileError.TYPE_MISMATCH_ERR: 
+//                   msg += 'Invalid filetype'; 
+//                   break;
+//              
+//                 default:
+//                   msg += 'Unknown Error'; 
+//                   break;
+//               };
+//              
+//              console.log(msg);
+//             };
+//             // create the directory for our app's files         
+//             fs.root.getDirectory('Documents', {create: true}, function(dirEntry) {
+//                 alert('You have just created the ' + dirEntry.name + ' directory.');
+//             }, errorHandler);
+  
+            // stylesheet used to render the preview
+           var css = "<head><link href=\"static/styles/markdown.css\" rel=\"stylesheet\"/></head>";
            var converter = new Showdown.converter();
            var delay;
+           updateFilelist();
+           
            // Initialize CodeMirror editor with a nice html5 canvas demo.
+           
            var editor = CodeMirror.fromTextArea(document.getElementById('code'), {
              mode: 'markdown',
              tabMode: 'indent',
-//              theme: "elegant",
              lineNumbers: true,
              onChange: function() {
                clearTimeout(delay);
@@ -108,6 +188,37 @@
                 frame.focus();
                 frame.print();
             }
+            function newEditor()
+            {
+                editor.setValue("");
+            }
+
+            function save()
+            {   
+                var filename = $('#filename').val();
+//                 window.localStorage.setItem(filename, editor.getValue().trim());
+                updateFilelist();
+                // create and write to a new file
+                fs.root.getFile('test.txt', {create: false}, function(fileEntry) {
+                  fileEntry.createWriter(function(fileWriter) {
+                    window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder; 
+                    var bb = new BlobBuilder();
+                    bb.append(editor.getValue().trim());
+                    fileWriter.write(bb.getBlob('text/plain')); 
+                  }, errorHandler);
+                }, errorHandler);                 
+                
+                $('#saveModal').modal('hide');
+            }
+            
+            function updateFilelist() {
+                $('#filelist').empty();
+                var s = window.localStorage;
+                for( var i = 0; i < s.length; i++) {
+                    $("#filelist").append("<lid><a class=open href=\"#\">"+s.key(i)+"</a></li>");
+                }
+            }
+
 //            function updatePreview() {
 // 	         outputPane = document.getElementById("output");             
 //              var html = converter.makeHtml(editor.getValue());
@@ -116,7 +227,7 @@
 //            }
 //            setTimeout(updatePreview, 300);
 
-           var css = "<head><link href=\"static/styles/markdown.css\" rel=\"stylesheet\"/></head>";
+           
            function updatePreview() {
              var previewFrame = document.getElementById('preview');
              var preview =  previewFrame.contentDocument ||  previewFrame.contentWindow.document;
@@ -126,6 +237,28 @@
 //              preview.close();
            }
            setTimeout(updatePreview, 300);
+           
+            $(".open").click(function(event) {
+                var filename = this.text;
+                editor.setValue(window.localStorage.getItem(filename));            
+            });
          </script>
+         
+        <div class="modal hide" id="saveModal">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h3>Save</h3>
+            </div>
+
+            <div class="modal-body">
+                <p>Enter a file name</p>
+                <input id=filename type=text></input>
+            </div>        
+            
+            <div class="modal-footer">
+                <a href="#" class="btn1" data-dismiss="modal">Cancel</a>
+                <a href="#" class="btn btn-success" onclick="save();">Save</a>
+            </div>
+        </div>
   </body>
 </html>
