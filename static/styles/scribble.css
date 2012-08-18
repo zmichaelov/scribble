@@ -1,0 +1,20 @@
+.CodeMirror { width: 100%; height: 615px; }
+.CodeMirror-scroll { height: 100%; }
+.btn-group{ padding-left: 0px; padding-right: 0px; }
+.btn-toolbar{ margin-top: 0px; margin-bottom: 0px; }
+
+#output { 
+    height: 620px;
+    float: right; 
+    margin-left: 0px;
+    background-color: #FFFFFF;
+}
+
+h3 { color: #FEC34F; }
+#header { margin-left: 20px; }
+
+.container-fluid { height: 615px; }
+iframe { height: 100%; width: 100%; }
+
+/* .jqx-widget-content { border-color: #FFFFFF; } */
+
